@@ -17,52 +17,35 @@ namespace DapperCrudOperations.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Student>>> GetAllStudent()
+        public async Task<IActionResult> GetAll()
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("dbconn"));//sql connection
-            IEnumerable<Student> students = await SelectAllStudents(connection);
-            return Ok(students);
+            var data = await _config.StudentsDetails.GetStudent();
+            return Ok(data);
         }
-
-
-
-        [HttpGet("{StudentId}")]
-        public async Task<ActionResult<Student>> GetStudent(int StudentId)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("dbconn"));//sql connection
-            var student = await connection.QueryFirstAsync<Student>("select * from StudentsDetails where id=@Id",
-                new { Id = StudentId });
-            return Ok(student);
+            var data = await _config.StudentsDetails.GetStudentBy(id);
+            if (data == null) return Ok();
+            return Ok(data);
         }
-
         [HttpPost]
-        public async Task<ActionResult<List<Student>>> PostStudent(Student student)
+        public async Task<IActionResult> Add(Student student)
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("dbconn"));//sql connection
-            await connection.ExecuteAsync("insert into StudentsDetails (name, familyName, address,contactNumber) values (@Name, @FamilyName, @Address, @ContactNumber)", student);
-            return Ok(SelectAllStudents(connection));
+            var data = await _config.StudentsDetails.AddStudentAsync(student);
+            return Ok(data);
         }
-
-        [HttpPut("{StudentId}")]
-        public async Task<ActionResult<List<Student>>> UpdateStudent(int StudentId, Student student)
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("dbconn"));//sql connection
-            await connection.ExecuteAsync("update StudentsDetails name=@Name, familyName= @FamilyName, address=@Address, contactNumber=@ContactNumber where id=@Id", new { Id = StudentId });
-            return Ok(SelectAllStudents(connection));
+            var data = await _config.StudentsDetails.DeleteStudentAsync(id);
+            return Ok(data);
         }
-
-
-        [HttpDelete("{StudentId}")]
-        public async Task<ActionResult<List<Student>>> DeleteStudent(int StudentId)
+        [HttpPut]
+        public async Task<IActionResult> Update(Student student)
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("dbconn"));//sql connection
-            await connection.ExecuteAsync("Delete from StudentsDetails where id=@Id", new { Id = StudentId });
-            return Ok(SelectAllStudents(connection));
-        }
-
-        private static async Task<IEnumerable<Student>> SelectAllStudents(SqlConnection connection)
-        {
-            return await connection.QueryAsync<Student>("select * from StudentsDetails");
+            var data = await _config.StudentsDetails.UpdateStudentAsync(student);
+            return Ok(data);
         }
     }
 }

@@ -1,5 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
+//Configure dapper with connection string
+
+
 // Add services to the container.
 
 builder.Services.AddControllers();
